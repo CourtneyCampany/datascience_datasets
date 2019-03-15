@@ -1,0 +1,159 @@
+---
+title: "FACE Experiments"
+author: "Cheyenne Brown"
+date: "April 20, 2018"
+output: 
+  word_document:
+    reference_docx: manuscriptstyle.docx
+---
+\
+##Photosynthesis
+\
+Both ambient and enriched CO2 levels vary with response to foliage photosynthesis (Figure 1a).However, the net photosynthesis is typically higher for enriched CO2 foliage in comparison to ambient CO2 foliage (Figure 1a). The foliage under enriched CO2 conditions is more often above 20 umols m^-2 s^-1 whereas foliage under ambient CO2 conditions is typically around 20 umols m^-2 s^-1 or lower.Net photosynthesis seems to decrease between 2021 to 2024, with the acception of 2023 (Figure 1a). The response ratio (which is enriched CO2 over ambient CO2) fluctuates between 2021 and 2024 (Figure 2b).However, the ratio is smaller between 2021 and 2022, however, again decreases by 2024 (Figure 1b).In terrestrial environments, photosynthesis removes CO2 from the atmosphere, yet photosynthesis of increase as CO2 rises. 
+\
+\
+##Literfall
+\
+Leaves take up the majority of dry biomass of literfall between the years of 2020 to 2023 (Figure 2). This is feasible considering the foliage on trees and other forms of vegetation in comparison to literfall that takes up less space such as seeds. Therefore, seeds take up the least amount of dry biomass, specifically during years 2020 to 2023 (Figure 2).Dry biomass (in grams) was highest in 2023, second highest in 2021, third highest in 2022, and lowest in 202 (Figure 2). There is an upward trend in terms of leaves and bark from 2020 to 2023. (Figure 2). the amount of bark dry biomass in 2021, 2022, and 2023 is very similar in amount. (Figure 2). While there is an increase in seed between 2020 and 2021, seed dry biomass decreases between 2021 and 2022, and even further between 2022 and 2023 (Figure 2). 
+\
+\
+##Annual Productivity
+\
+Above ground net primary productivity decreases slightly between 2022 and 2023, yet increases by 2024 (Figure 3). Aboveground net primary productivity includes the sum of stemwood biomass production, fine twig and bark production, seed production, and finally leaf production (Figure 3). The ANPP is measure in C m^-2 yr^-1. There are differences based on treatment-enriched CO2 (eCO2) in when compared to ambient CO2 (aCO2). In 2022, ANPP is higher in ambient CO2 conditions than in enriched CO2 conditions. Moreover, in 2023, ANPP is higher in enriched CO2 conditions rather than ambient CO2 conditions (Figure 3). Finally, in 2024, ANPP is significantly higher during enriched CO2 exposure when compared to ambient CO2, which contributes to much lower aboveground net productivity level (Figure 3). Net primary productivity is highest in 2024 and lowest in 2023 (Figure 3).
+\
+\
+#Defoliation From Insects
+\
+There are a few defoliation events over the course of 2021 to 2024. The events are of greater magnitude in the later years, with the greatest defoliation even being in 2024 (Figure 4). The defoliation events occur due to insect outbreaks. There are greater defoliation events under enriched CO2 conditions (Figure 4). Leaf biomass is also higher generally speaking under enriched CO2 conditions between years 2021 and 2024 (Figure 4). Therefore, a CO2 effect is expected.Where there are peaks in leaf biomass is where defoliation events occur, thus demonstrating they occur each year, but at differing severity and magnitudes (Figure 4).
+\
+\
+\
+\
+\
+```{r Figure 1, echo=FALSE, warning=FALSE, message=FALSE}
+#read in data
+photo <- read.csv("data/face_photosynthesis.csv")
+#Figure 1a
+#make sure not factor, but date...
+library(lubridate)
+library(doBy)
+photo$Date2 <-paste(photo$Date, "01", sep="_")
+#format as date
+photo$Date2 <-as.Date(photo$Date2, format="%b_%Y_%d", tz="UTC")
+mycol <- c("brown1", "dodgerblue4")
+synthlab <- expression(Net~Photosynthesis~~(umols~m^-2~s^-1))
+se <-function(x) sd(x)/sqrt(length(x))
+newphoto <-photo[complete.cases(photo$Anet),] 
+photo_agg <-doBy::summaryBy(Anet~Date2 + treatment, data=newphoto, FUN=c(mean,se))
+par(mfrow=c(2,1), mar=c(0,0,0,0), oma=c(5,6,2,1))
+plot(Anet.mean ~ Date2, data=photo_agg, col=mycol[treatment],pch=16, xlab="", ylim=c(13,31), xaxt="n")
+with(photo_agg, arrows(Date2, Anet.mean, Date2, Anet.mean+Anet.se, angle=90,
+                       length=0.03,col=mycol[treatment]))
+with(photo_agg, arrows(Date2, Anet.mean, Date2, Anet.mean-Anet.se, angle=90,
+                       length=0.03, col=mycol[treatment]))
+legend("topright", levels(photo_agg$treatment), pch=16, col=mycol, bty = 'o')
+mtext(side=2, line=4, synthlab, cex=0.75)
+
+#making 2nd plot of Figure 1
+a <- photo_agg[photo_agg$treatment %in% c("aCO2"),]
+e <- photo_agg[photo_agg$treatment %in% c("eCO2"),]
+new_co2 <- merge(a,e, by="Date2")
+photo_agg <-doBy::summaryBy(Anet~Date2 + treatment, data=newphoto, FUN=c(mean,se))
+new_co2$rr_mean <- new_co2$Anet.mean.y/new_co2$Anet.mean.x
+new_co2$rr_se <- new_co2$Anet.se.y/new_co2$Anet.se.x
+co2_agg <-doBy::summaryBy(rr_mean~Date2, data=new_co2, FUN=c(mean,se))
+plot (rr_mean~Date2, data=new_co2, xlab="Years", col="mediumpurple", pch=16)
+#need to fix how far arrows go... 
+with(new_co2, arrows(Date2, rr_mean, Date2, rr_mean+rr_se, angle = 90, length=0.03, col="mediumpurple"))
+with(new_co2, arrows(Date2, rr_mean, Date2, rr_mean-rr_se, angle = 90, length = 0.03, col="mediumpurple"))
+mtext(side=2, line=3, "Response Ratio", cex=.90)
+```
+\
+Figure 1. The Foliage Photosynthesis By Treatment (1a) and Response Ratio (1b)
+\
+There are two treatments--aCO2, which is ambient CO2 and eCO2, which is enriched CO2. aCO2 is depicted in red and eCO2 is depicted in blue (Figure 1a)
+\
+```{r Figure 2, echo=FALSE, warning=FALSE, message=FALSE}
+litter1 <- read.csv("data/face_litter.csv")
+#doBy and lubridate are already loaded above
+litter1$treatment <-as.factor(ifelse(litter1$ring==2| litter1$ring==3|litter1$ring==6, "aCO2", "eCO2"))
+line.num <-which.max(litter1$twig)
+litter<-litter1[-line.num,]
+basket <-.2
+c_frac <-.47
+#remove NA's by using complete cases
+litter <-litter[complete.cases(litter),]
+litter$Date2 <-paste(litter$Date, sep="/")
+#get's stuck below this... 
+litter$Date2<-as.Date(litter$Date2, format = "%d/%m/%Y")
+litter_carbon <- data.frame(litter[,1:3],(litter[,4:7]*c_frac/basket), litter[,8:9])
+litter_carbon$year <-year(litter_carbon$Date2)
+lit_annual<-summaryBy(twig+bark+seed+leaf~year+ring+treatment, data=litter_carbon, FUN=sum, na.rm=TRUE, keep.names = TRUE)
+library(ggplot2)
+library(reshape2)
+re<-reshape2::melt(lit_annual, id.vars="year", measure.vars=c("twig", "bark", "seed", "leaf"))
+g<-ggplot(re, aes(x=year, y=value, fill=variable), ylab="Dry Biomass (grams)")+geom_bar(stat = "identity")
+g+labs(fill="Litterfall", y="Dry Biomass (grams)")
+```
+\
+Figure 2. Annual Productivity Based on Type of Dry Biomass
+\
+Literfall includes twig, bark, seed, and leaf dry biomass data. Dry biomass is in grams. 
+\
+```{r Figure 3, echo=FALSE, warning=FALSE, message=FALSE}
+wood_npp <- read.csv("data/face_woodbiomass.csv")
+library(sciplot)
+litter$year <-year(litter$Date2)
+# wood_npp$year <-year(wood_npp$year)
+##merge_npp <- merge(litter, wood_npp, by="year")
+ring_diameter <- 25
+ring_area <- pi*(ring_diameter/2)^2
+kg_to_g <- 1000
+se <-function(x)sd(x)/dqrt(length(x))
+#sum wood biomass for each ring during each year
+total_wood_ring <- summaryBy(biomass_kg~year+ring+treatment, data=wood_npp, FUN=sum, na.rm=TRUE, keep.names = T)
+total_seed_ <- summaryBy(seed~year+treatment, data=litter, FUN=sum, na.rm=TRUE, keep.names=T)
+total_leaf <- summaryBy(leaf~year+treatment, data=litter, FUN=sum, na.rm=TRUE, keep.names=T)
+total_twig <- summaryBy(twig~year+treatment, data=litter, FUN=sum, na.rm=TRUE, keep.names=T)
+total_bark <-summaryBy(bark~year+treatment, data=litter, FUN=sum, na.rm=TRUE, keep.names=T)
+merge_npp <- merge(total_bark,total_leaf)
+merge_npp1 <-merge(merge_npp, total_twig)
+merge_npp2 <-merge(merge_npp1, total_seed_)
+total_wood_ring$year <- as.numeric(total_wood_ring$year)
+# final_merge$year <-as.Date(final_merge$year)
+final_merge <-merge(merge_npp2, total_wood_ring)
+dates <-unique(final_merge$year)
+dates <-dates[order(dates)]
+synthlabwood <- expression(ANPP~~(C~m^-2~yr^-1))
+final_merge$year <-paste(final_merge$year, "/12/31", sep="")
+final_merge$year <-as.Date((final_merge$year))
+
+par(mfrow=c(1,1), mar=c(0,0,0,0), oma=c(5,6,2,1))
+
+colo <- c("cyan3", "mediumpurple1")
+plot((bark+leaf+twig+seed+biomass_kg)~year, data=final_merge, pch=16, ylab=synthlabwood, xlab="", col=colo[treatment], cex=1.5)
+legend("topleft", levels(final_merge$treatment), pch=16, cex=1, col=colo, bty='n')
+
+```
+\
+Figure 3. Aboveground Net Productivity By Year and Treatment
+\
+There are two treatments--aCO2, which is ambient CO2 and eCO2, which is enriched CO2. aCO2 is depicted in turquoise and eCO2 is depicted in purple (Figure 3).
+\
+```{r Figure 4, echo=FALSE, warning=FALSE, message=FALSE}
+par(mar=c(5,5,1,1))
+aco2 <-litter[litter$treatment %in% c("aCO2"),]
+eco2 <-litter[litter$treatment %in% c("eCO2"),]
+mtreatment <- merge(aco2, eco2, by="Date2")
+mycol2 <- c("red1", "royalblue1")
+plot(leaf.y~Date2, data=mtreatment, type="l", col="red1", ylab="Leaf Biomass (g)", ylim=c(0, 55), xlab="", lwd=2)
+lines(leaf.x~Date2, data=mtreatment, type="l", col="royalblue1", lwd=2)
+label <- levels(mtreatment$treatment.x)
+leglab<- c(levels(mtreatment$ring.y), label)
+legend("topleft", legend=leglab, col=mycol2, pch=16)
+```
+\
+Figure 4. Defoliation Events Based on Treatment
+\
+There are two treatments--aCO2, which is ambient CO2 and eCO2, which is enriched CO2. aCO2 is depicted in red and eCO2 is depicted in blue (Figure 4).
+
